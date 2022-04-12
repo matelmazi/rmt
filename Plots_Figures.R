@@ -129,7 +129,9 @@ BIactNew2$MI_UEcat[BIactNew2$MI_UE_base < 31 ] <- "MI_UE: 0-30"
 BIactNew2$MI_UEcat[BIactNew2$MI_UE_base < 70  & BIactNew2$MI_UE_base >= 31] <- "MI_UE: 31-69"
 BIactNew2$MI_UEcat[BIactNew2$MI_UE_base >=70] <- "MI_UE: 70-100"
 
-#' ## Plots exploration of splines with different df 
+#' ## Plots exploration of splines with different df
+# To do this step model m2.3 is used but it should be loaded first
+# Any other model under study of course can also be used 
 set.seed(123)
 ind <- sample(unique(data_morethanonerow$Patient_nummer), 49, replace = F)
 
