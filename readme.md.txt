@@ -17,3 +17,10 @@ Days: discrete numerical variable from 0 to 296
 Partner: yes(1), no(0)
 BITOT: discrete numerical variable from 0 to 20
 BITOTact: discrete numerical variable from 0 to 16
+
+The different scripts can be runned with the specific order:
+1. Model_building: to explore the data(descriptives, existence of missing values,etc), define and analyze different model structures.
+2. Cross_validation: code to perform cross validation
+3. CV results: mostly error plots to check lowest model error from the cross-validation
+4. Plots_Figures: R code that was used to obtain the figures
+Functions should be loaded with the command source() at all previous scripts to use the IndvPred_lme_2 function were needed. 
