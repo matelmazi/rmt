@@ -294,47 +294,6 @@ m6.5_no_FM <- lme(BITOT ~ ns(Days, 5)*(Geslacht + StrokeLeeftijd) +
                   data = BIactNew2, method = "ML")
 
 
-
-DynPlots <- function(model.output = model.output, newdata, timeVar, 
-                     main_title = "Dynamic predictions"){
-  
-# Load individual prediction ------------------------------------
-data <- model.output$data
-formYx <- formula(model.output)
-yOutcome <- formYx[[2]]
-
-IndvPrediction95 <- IndvPred_lme_2(lmeObject = model.output, newdata, timeVar, times = NULL, M = 500, 
-                                 interval = "prediction", return_data = TRUE)
-
-IndvPrediction68 <- IndvPred_lme_2(lmeObject = model.output, newdata, timeVar, times = NULL, M = 500, 
-                                 interval = "prediction", return_data = TRUE, level = 0.68)
-
-pred95 <- IndvPrediction95[which(!is.na(IndvPrediction95$low)),]
-pred68 <- IndvPrediction68[which(!is.na(IndvPrediction68$low)),]
-
-nopred <- IndvPrediction95[which(is.na(IndvPrediction95$low)),]
-
-timeVariable <- pred95[[timeVar]]
-
-xyplot(pred ~ timeVariable , main = main_title, data = pred95,
-       type = "l", col = rgb(0.6769,0.4447,0.7114, alpha = 1), lty = c(1, 2, 2), lwd = 3,
-       ylim = c(0,30), xlim = c(0,230), ylab = list("BI", cex = 1.5), xlab = list("Days since stroke", cex = 1.5),
-       scales = list(x = list(cex = 1.3) , y = list(cex = 1.3)),
-       panel = function(x, y,  ...) {
-         panel.xyplot(x, y, ...)
-         panel.polygon(c(pred95[,"Days"], rev(pred95[,"Days"])), 
-                       c(pred95[,"upp"], rev(pred95[,"low"])),
-                       col = "bisque", border=NA)
-         panel.polygon(c(pred68[,"Days"], rev(pred68[,"Days"])), 
-                       c(pred68[,"upp"], rev(pred68[,"low"])),
-                       border = NA,
-                       col =rgb(0.6769,0.4447,0.7114, alpha = 0.4))
-         panel.points(x = nopred[[timeVar]], y = nopred[[yOutcome]], cex = 1.2, pch = 16, col = "black");
-         panel.lines(x = rep(tail(nopred[[timeVar]], n = 1), 200), y = seq(-100, 100, length = 200), col = "grey", lty = 3, lwd = 2)
-         panel.lines(x = pred95$Days, y = pred95$pred, col = "black", lty = 1, lwd = 2)
-       })
-}
-
 #' Illustration for Patient 
 newPatient <- BIactNew2[BIactNew2$Patient_nummer == 45, ]
 newPatient0 <- newPatient[1:1, ]
@@ -357,13 +316,6 @@ p42 <- DynPlots(model.output = m6.5_no_FM, newdata = newPatient2,
 p43 <- DynPlots(model.output = m6.5_no_FM, newdata = newPatient3, 
                 timeVar = "Days",
                 main_title = "")
-p44 <- DynPlots(model.output = m6.5_no_FM, newdata = newPatient4, 
-                timeVar = "Days",
-                main_title = "")
-p45 <- DynPlots(model.output = m6.5_no_FM, newdata = newPatient4, 
-                timeVar = "Days",
-                main_title = "")
 
-grid.arrange(p40, p41, p42, p43, p44, p45, nrow = 3, widths=c(3,3))
-
-grid.arrange(p41, p40, p43, p42, p45, p44, nrow = 3, widths=c(3,3))
+grid.arrange(p40, p41, p42, p43, nrow = 2, widths=c(2,2))
+grid.arrange(p41, p40, p43, p42, nrow = 2, widths=c(2,2))

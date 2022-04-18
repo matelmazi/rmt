@@ -149,41 +149,41 @@ IndvPred_lme_2 <- function (lmeObject, newdata, timeVar, times = NULL, M = 200L,
 
 
 DynPlots <- function(model.output = model.output, newdata, timeVar, 
-                     main_title = "Dynamic predictions", legend = TRUE,
-                     nameX = "Time since stroke (days)",
-                     nameY = "BI") {
+                     main_title = "Dynamic predictions"){
   
-  
-  # Generating individual prediction ------------------------------------
-  
+  # Load individual prediction ------------------------------------
   data <- model.output$data
   formYx <- formula(model.output)
-  y <- formYx[[2]]
+  yOutcome <- formYx[[2]]
   
-  IndvPrediction <- IndvPred_lme_2(lmeObject = model.output, newdata, timeVar, times = NULL, M = 500, 
-                                 interval = "prediction", return_data = TRUE)
+  IndvPrediction95 <- IndvPred_lme_2(lmeObject = model.output, newdata, timeVar, times = NULL, M = 500, 
+                                     interval = "prediction", return_data = TRUE)
   
-  pred <- IndvPrediction[which(!is.na(IndvPrediction$low)),]
+  IndvPrediction68 <- IndvPred_lme_2(lmeObject = model.output, newdata, timeVar, times = NULL, M = 500, 
+                                     interval = "prediction", return_data = TRUE, level = 0.68)
   
-  # Generating plot -----------------------------------------------------
-  plot <- ggplot() + theme_bw()+
-    geom_point(aes(x = newdata[[timeVar]], y = newdata[[y]], colour = "Obsv"), size = 1.5) +
-    
-    geom_line(aes(x = pred[[timeVar]], y = pred[["pred"]], colour = "Pred"), size = 1.2) +
-    geom_line(aes(x = pred[[timeVar]], y = pred[["low"]], colour = "CI"), linetype = 3, size = 1.2) +
-    geom_line(aes(x = pred[[timeVar]], y = pred[["upp"]], colour = "CI"), linetype = 3, size = 1.2) +
-    geom_vline(xintercept = tail(newdata[[timeVar]], n = 1), linetype = "longdash", colour = c("black")) +
-    
-    scale_x_continuous(name = nameX, limits = c(0, 200), expand = c(0,0)) +
-    scale_y_continuous(name = nameY, limits = c(0, 40), expand = c(0,0)) +
-    scale_colour_manual(name = "", values = c("black", "black")) + 
-    
-    ggtitle(main_title) +
-    theme(
-      plot.title = element_text(size = 15),
-      axis.title = element_text(size = 15),
-      axis.text = element_text(size = 13),
-      legend.position = "none"
-    )  
-  plot
+  pred95 <- IndvPrediction95[which(!is.na(IndvPrediction95$low)),]
+  pred68 <- IndvPrediction68[which(!is.na(IndvPrediction68$low)),]
+  
+  nopred <- IndvPrediction95[which(is.na(IndvPrediction95$low)),]
+  
+  timeVariable <- pred95[[timeVar]]
+  
+  xyplot(pred ~ timeVariable , main = main_title, data = pred95,
+         type = "l", col = rgb(0.6769,0.4447,0.7114, alpha = 1), lty = c(1, 2, 2), lwd = 3,
+         ylim = c(0,30), xlim = c(0,230), ylab = list("BI", cex = 1.5), xlab = list("Days since stroke", cex = 1.5),
+         scales = list(x = list(cex = 1.3) , y = list(cex = 1.3)),
+         panel = function(x, y,  ...) {
+           panel.xyplot(x, y, ...)
+           panel.polygon(c(pred95[,"Days"], rev(pred95[,"Days"])), 
+                         c(pred95[,"upp"], rev(pred95[,"low"])),
+                         col = "bisque", border=NA)
+           panel.polygon(c(pred68[,"Days"], rev(pred68[,"Days"])), 
+                         c(pred68[,"upp"], rev(pred68[,"low"])),
+                         border = NA,
+                         col =rgb(0.6769,0.4447,0.7114, alpha = 0.4))
+           panel.points(x = nopred[[timeVar]], y = nopred[[yOutcome]], cex = 1.2, pch = 16, col = "black");
+           panel.lines(x = rep(tail(nopred[[timeVar]], n = 1), 200), y = seq(-100, 100, length = 200), col = "grey", lty = 3, lwd = 2)
+           panel.lines(x = pred95$Days, y = pred95$pred, col = "black", lty = 1, lwd = 2)
+         })
 }
